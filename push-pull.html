@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <title>Push-pull</title>
+  </head>
+  <body>
+    <div class="row" style="text-align:center">
+      <div class="form-inline bg-info">
+        <div class="form-group">
+          <label class="sr-only" for="username">Github Username</label>
+          <input type="text" class="form-control" id="username" placeholder="username">
+        </div>
+        <div class="form-group">
+          <label class="sr-only" for="repository">Github Repository</label>
+          <div class="input-group">
+            <div class="input-group-addon">/</div>
+            <input type="text" class="form-control" id="repository" placeholder="repository">
+          </div>
+        </div>
+        <button id='get_pulls' class="btn btn-primary">Fetch Pulls</button>
+        <button id='get_issues' class="btn btn-primary">Fetch Issues</button>
+      </div>
+    </div>
+    <div class="row" style="padding: 10px;">
+      <div class="col-md-4">
+        <h2>Lifetimes</h2>
+        <p>Time between the pull request creation and closed time</p>
+        <p><canvas id="lifespan" width="400" height="400"></canvas></p>
+      </div>
+      <div class="col-md-4">
+        <h2>Created By</h2>
+        <p>Pull requests by user</p>
+        <p><canvas id="created" width="400" height="400"></canvas></p>
+      </div>
+      <div class="col-md-4">
+        <h2>Assigned To</h2>
+        <p>Pull requests by user</p>
+        <p><canvas id="assigned" width="400" height="400"></canvas></p>
+      </div>
+    </div>
+    <script src="jquery-2.0.3.js"></script>
+    <script src="push-pull.js"></script>
+  </body>
+</html>
