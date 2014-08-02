@@ -19,28 +19,40 @@
             <input type="text" class="form-control" id="repository" placeholder="repository">
           </div>
         </div>
-        <button id='get_pulls' class="btn btn-primary">Fetch Pulls</button>
-        <button id='get_issues' class="btn btn-primary">Fetch Issues</button>
+        <button id="get_pulls" class="btn btn-primary">Fetch Pulls</button>
+        <button id="get_issues" class="btn btn-primary">Fetch Issues</button>
+        <div class="form-group">
+          <label class="sr-only" for="token">Github Token</label>
+          <input type="text" class="form-control" id="token" placeholder="token">
+        </div>
+        <button id="set_token" class="btn btn-primary">Set Token</button>
+        <label class="sr-only" id="select_label">No selection</label>
+        <button id="reset_selection" class="btn btn-primary">Reset</button>
       </div>
     </div>
     <div class="row" style="padding: 10px;">
       <div class="col-md-4">
         <h2>Lifetimes</h2>
-        <p>Time between the pull request creation and closed time</p>
+        <p>Time between the creation and close of the pull request/issue.</p>
         <p><canvas id="lifespan" width="400" height="400"></canvas></p>
+        <table id="lifespan_list" class="table table-striped"></table>
       </div>
       <div class="col-md-4">
         <h2>Created By</h2>
-        <p>Pull requests by user</p>
+        <p>Pull requests/issue by creation user</p>
         <p><canvas id="created" width="400" height="400"></canvas></p>
+        <table id="created_list" class="table table-striped"></table>
       </div>
       <div class="col-md-4">
         <h2>Assigned To</h2>
-        <p>Pull requests by user</p>
+        <p>Pull requests/issue by assigned user</p>
         <p><canvas id="assigned" width="400" height="400"></canvas></p>
+        <table id="assigned_list" class="table table-striped"></table>
       </div>
     </div>
     <script src="jquery-2.0.3.js"></script>
+    <script src="pie_chart.js"></script>
+    <script src="histogram.js"></script>
     <script src="push-pull.js"></script>
   </body>
 </html>
