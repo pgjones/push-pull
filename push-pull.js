@@ -8,6 +8,10 @@ push_pull.select = function(gh_object) {return true;} // by default select every
 push_pull.lifespan_histogram = new push_pull.Histogram($('#lifespan'), $('#lifespan_list'));
 push_pull.created_pie = new push_pull.PieChart($('#created'), $('#created_list'), push_pull.STypes.Created);
 push_pull.assigned_pie = new push_pull.PieChart($('#assigned'), $('#assigned_list'), push_pull.STypes.Assigned);
+push_pull.lifetime_comments = new push_pull.Graph($('#lifetime_comments'), "comments");
+push_pull.lifetime_number = new push_pull.Graph($('#lifetime_number'), "# number");
+push_pull.lifetime_commits = new push_pull.Graph($('#lifetime_commits'), "commits");
+push_pull.lifetime_changes = new push_pull.Graph($('#lifetime_changes'), "changes");
 
 /// Change the selection criteria, the content of the value paramters depend on 
 /// the type
@@ -35,6 +39,7 @@ push_pull.change_selection = function(type, value, value2)
     label.text('Selecting assigned to ' + value);
   }
   push_pull.update();
+  push_pull.update_plots();
 }
 
 /// Helper method, gets the lifespan of a gh object
@@ -113,12 +118,58 @@ push_pull.sort_contributors = function(contributors)
   return sorted_contributors;
 }
 
+/// This function updates the plots
+push_pull.update_plots = function()
+{
+  var lifetime_comments = [];
+  var lifetime_number = [];
+  var lifetime_commits = [];
+  var lifetime_changes = [];
+  for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
+  {
+    if(!push_pull.select(push_pull.gh_objects[iobject]))
+      continue;
+    lifetime_comments.push([push_pull.gh_objects[iobject].comments, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+    lifetime_number.push([push_pull.gh_objects[iobject].number, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+    if(push_pull.gh_objects[iobject].commits)
+      lifetime_commits.push([push_pull.gh_objects[iobject].commits, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+    if(push_pull.gh_objects[iobject].additions && push_pull.gh_objects[iobject].deletions)
+      lifetime_changes.push([push_pull.gh_objects[iobject].additions + push_pull.gh_objects[iobject].deletions, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+  }
+  push_pull.lifetime_comments.update(lifetime_comments);
+  push_pull.lifetime_number.update(lifetime_number);
+  push_pull.lifetime_commits.update(lifetime_commits);
+  push_pull.lifetime_changes.update(lifetime_changes);
+}
+
+$('#get_details').on('click', function()
+{
+  var setter = function(iobject)
+  {
+    return function(json) 
+    {
+      push_pull.gh_objects[iobject].comments = json.comments;
+      push_pull.gh_objects[iobject].number = json.number;
+      if(json.commits)
+        push_pull.gh_objects[iobject].commits = json.commits;
+      if(json.additions)
+        push_pull.gh_objects[iobject].additions = json.additions;
+      if(json.deletions)
+        push_pull.gh_objects[iobject].deletions = json.deletions;
+      push_pull.update_plots();
+    }
+  }
+  for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
+  {
+    $.getJSON(push_pull.gh_objects[iobject].url, setter(iobject));
+  }
+});
+
 /// This function takes an array of closed pull request objects and fills the data arrays
 push_pull.process = function(json)
 {
   push_pull.gh_objects.push.apply(push_pull.gh_objects, json);
 }
-
 
 $('#get_pulls').on('click', function()
 {

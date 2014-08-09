@@ -44,8 +44,8 @@ push_pull.Histogram = function(canvas, table)
   /// This picks the sector the mouse is over (if any)
   this.pick = function(event)
   {
-    var x = event.pageX - this._canvas.offset().left;
-    var y = event.pageY - this._canvas.offset().top;
+    var x = (event.pageX - this._canvas.offset().left) / this._canvas.width() * this._context.canvas.width;
+    var y = (event.pageY - this._canvas.offset().top) / this._canvas.height() * this._context.canvas.height;
     if(y > this._height || x < 20)
     {
       this._selected = -1;
@@ -61,8 +61,8 @@ push_pull.Histogram = function(canvas, table)
   this.update = function(data)
   {
     // Set the bin counts to zero
-    for(var bin in this._bins)
-      this._bins[bin].count = 0;
+    for(var ibin = 0; ibin < this._bins.length; ibin++)
+      this._bins[ibin].count = 0;
     // Now convert the array into bin counts
     for(var idata = 0; idata < data.length; idata++)
     {

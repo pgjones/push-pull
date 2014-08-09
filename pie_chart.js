@@ -32,8 +32,8 @@ push_pull.PieChart = function(canvas, table, type)
   /// This picks the sector the mouse is over (if any)
   this.pick = function(event)
   {
-    var x = event.pageX - this._canvas.offset().left;
-    var y = event.pageY - this._canvas.offset().top;
+    var x = (event.pageX - this._canvas.offset().left) / this._canvas.width() * this._context.canvas.width;
+    var y = (event.pageY - this._canvas.offset().top) / this._canvas.height() * this._context.canvas.height;
     var distance2 = Math.pow(x - this._center[0], 2) + Math.pow(y - this._center[1], 2);
     if(distance2 > Math.pow(this._radius, 2))
     {
