@@ -62,7 +62,7 @@ push_pull.Graph = function(canvas, name)
         x = Math.log(this._data[ipoint][0] - this._x[0]) / Math.LN10;
       // Fill a 2x2 squre for each point, remember canvas coordinates are from 
       // top, left not bottom, left as in graphs
-      this._context.fillRect(this._axis_size + xscale * x, (range - this._data[ipoint][1]) * yscale - 1, 2, 2);
+      this._context.fillRect(this._axis_size + xscale * x, (this._y[1] - this._data[ipoint][1]) * yscale - 1, 2, 2);
     }
     // Draw x, y axis lines
     this._context.strokeStyle = "Blue";
