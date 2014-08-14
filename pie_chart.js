@@ -1,7 +1,8 @@
 var push_pull = push_pull || {}; // Global namespace
 
 /// Create a pie chart with a JQuery canvas object, a table object and a 
-/// selection type
+/// selection type.
+/// This adds a segment to the top this._colours.length users (default 7)
 push_pull.PieChart = function(canvas, table, type)
 {
   this._canvas = canvas;
@@ -9,10 +10,10 @@ push_pull.PieChart = function(canvas, table, type)
   this._context = canvas[0].getContext("2d");
   this._center = [this._context.canvas.width / 2, this._context.canvas.height / 2];
   this._radius = this._context.canvas.width / 2 - 40;
-  this._selected = -1;
-  this._type = type;
+  this._selected = -1; // Segment selected by mouse, -1 => no selection
+  this._type = type; // Type of pie chart, assigned or created (used globally)
   this._data = [];
-  this._colours = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"] // Colours by id
+  this._colours = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"] // Segment colours by id
   this._canvas.on('mousemove', function(event) {this.mouse_move(event);}.bind(this));
   this._canvas.on('mouseleave', function() {this._selected = -1;this.draw();}.bind(this));
   this._canvas.on('mouseup', function(event) {this.mouse_click(event);}.bind(this));
@@ -27,6 +28,7 @@ push_pull.PieChart = function(canvas, table, type)
   {
     this.pick(event);
     if(this._selected > -1 && this._selected < this._colours.length)
+      // Change the global selection to by username
       push_pull.change_selection(this._type, this._data[this._selected][2]);
   }
   /// This picks the sector the mouse is over (if any)
@@ -61,7 +63,7 @@ push_pull.PieChart = function(canvas, table, type)
   this.update = function(data)
   {
     var total = 0;
-    // First calculate the total
+    // First calculate the total count 
     for(var idata = 0; idata < data.length; idata++)
       total += data[idata][0];
     // Now create the [start_angle, end_angle, name, image, colour] array used 
@@ -71,12 +73,14 @@ push_pull.PieChart = function(canvas, table, type)
     var start_angle = 0.0;
     for(var idata = 0; idata < Math.min(this._colours.length, data.length); idata++)
     {
+      // Check if avatar has already been loaded, if not load it and save 
+      // globally in push_pull.images
       var image = push_pull.images[data[idata][2]];
       if(image === undefined)
       {
         image = new Image();
         image.src = data[idata][2];
-        push_pull.images[data[idata][2]] = image;
+        push_pull.images[data[idata][2]] = image; 
         image.onload = function() {this.draw();}.bind(this)
       }
       var end_angle = start_angle + data[idata][0] / total * 2.0 * Math.PI;
@@ -87,7 +91,8 @@ push_pull.PieChart = function(canvas, table, type)
                        this._colours[idata]]);
       start_angle = end_angle;
     }
-    // Add a others if needed 
+    // Now fill the circle if needed (only first this._colours.length get 
+    // individual segments).
     if(2.0 * Math.PI - start_angle > 0.0)
     {
       this._data.push([start_angle,
@@ -98,6 +103,8 @@ push_pull.PieChart = function(canvas, table, type)
     }
     // Now update the table
     this._table.empty();
+    // This function creates a closure method to change the global selection to 
+    // by username
     var select_generator = function(type, name) { return function(event) {push_pull.change_selection(type, name);} };
     for(var idata = 0; idata < data.length; idata++)
     {
@@ -134,9 +141,11 @@ push_pull.PieChart = function(canvas, table, type)
         this._context.drawImage(image, 0, 0, image.width, image.height,
                                 image_position[0],
                                 image_position[1], 20, 20);
+      // Additional text label, not very useful so commented out
       //this._context.fillText(this._data[idata][2], image_position[0], image_position[1] + 30, 20);
     }
     this._context.restore();    
   }
+  // Start with a graph deviod of data.
   this.update([]);
 }

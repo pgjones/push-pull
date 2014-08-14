@@ -1,8 +1,14 @@
 var push_pull = push_pull || {}; // Global namespace
+// Now the globals
 push_pull.gh_objects = []; // JSON github objects
 push_pull.images = {} // Global image collection
-push_pull.STypes = Object.freeze({None : 0, Lifespan : 1, Created : 2, Assigned : 3});
-push_pull.select = function(gh_object) {return true;} // by default select everything
+// Global modes, pull request or issues
+push_pull.MTypes = Object.freeze({PullRequest : 1, Issue : 2});
+push_pull.mode = push_pull.MTypes.PullRequest;
+// Selection types i.e. select on nothing, lifespan etc... 
+push_pull.STypes = Object.freeze({None : 0, Lifespan : 1, Created : 2, Assigned : 3}); 
+// Selection method, default is to select everything (no selection)
+push_pull.select = function(gh_object) {return true;} 
 
 /// Global plots
 push_pull.lifespan_histogram = new push_pull.Histogram($('#lifespan'), $('#lifespan_list'));
@@ -17,29 +23,27 @@ push_pull.lifetime_changes = new push_pull.Graph($('#lifetime_changes'), "change
 /// the type
 push_pull.change_selection = function(type, value, value2)
 {
-  var label = $('#select_label');
   if(type == push_pull.STypes.None)
   {
     push_pull.select = function(gh_object) {return true;}
-    label.text('No selection');
   }
   else if(type == push_pull.STypes.Lifespan)
   {
     push_pull.select = function(gh_object) {if(push_pull.lifespan(gh_object) < value2 && push_pull.lifespan(gh_object) > value) return true; return false;}
-    label.text('Selecting lifespans <' + value);
   }
   else if(type == push_pull.STypes.Created)
   {
     push_pull.select = function(gh_object) {if(gh_object.user != null && gh_object.user.login == value) return true; return false;}
-    label.text('Selecting created by ' + value);
   }
-  else if(type == push_pull.STypes.Assigned)
+  else if(type == push_pull.STypes.Assigned && push_pull.mode == push_pull.MTypes.PullRequest)
+  {
+    push_pull.select = function(gh_object) {if(gh_object.merged_by != null && gh_object.merged_by.login == value) return true;  return false;}
+  }
+  else if(type == push_pull.STypes.Assigned && push_pull.mode == push_pull.MTypes.Issue)
   {
     push_pull.select = function(gh_object) {if(gh_object.assignee != null && gh_object.assignee.login == value) return true;  return false;}
-    label.text('Selecting assigned to ' + value);
   }
   push_pull.update();
-  push_pull.update_plots();
 }
 
 /// Helper method, gets the lifespan of a gh object
@@ -59,24 +63,26 @@ push_pull.update = function()
   push_pull.update_plots();
 }
 
+/// This updates the lifespan histogram
 push_pull.update_lifespan = function()
 {
-  // First loop over gh objects and get the lifespans
+  // First loop over gh objects and add the lifespans to a list
   var lifespans = [];
   for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
   {
-    if(push_pull.select(push_pull.gh_objects[iobject]))
+    if(push_pull.select(push_pull.gh_objects[iobject])) // Is selected?
       lifespans.push(push_pull.lifespan(push_pull.gh_objects[iobject]));
   }
   push_pull.lifespan_histogram.update(lifespans);
 }
 
-/// This updates the created data and draws a pie chart
+/// This updates the created-by pie chart
 push_pull.update_created = function()
 {
   var contributors = {};
   for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
   {
+    // Has a user (can not exist strangely) and Is selected?
     if(push_pull.gh_objects[iobject].user == null || !push_pull.select(push_pull.gh_objects[iobject]))
       continue;
     var user = push_pull.gh_objects[iobject].user.login;
@@ -95,11 +101,27 @@ push_pull.update_assigned = function()
   var contributors = {};
   for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
   {
-    if(push_pull.gh_objects[iobject].assignee == null || !push_pull.select(push_pull.gh_objects[iobject]))
+    // Is selected?
+    if(!push_pull.select(push_pull.gh_objects[iobject]))
       continue;
-    var user = push_pull.gh_objects[iobject].assignee.login;
+    var user = null;
+    var avatar = null;
+    if(push_pull.mode == push_pull.MTypes.Issue && push_pull.gh_objects[iobject].assignee != null)
+    {
+      user = push_pull.gh_objects[iobject].assignee.login;
+      avatar = push_pull.gh_objects[iobject].assignee.avatar_url;
+    }
+    else if(push_pull.mode == push_pull.MTypes.PullRequest && push_pull.gh_objects[iobject].merged_by != null)
+    {
+      user = push_pull.gh_objects[iobject].merged_by.login;
+      avatar = push_pull.gh_objects[iobject].merged_by.avatar_url;
+    }
+    else 
+      continue; // No useful data (not merged or assigned)
+    if(avatar == null)
+      console.log(push_pull.gh_objects[iobject]);
     if(contributors[user] === undefined)
-      contributors[user] = {"avatar" : push_pull.gh_objects[iobject].assignee.avatar_url, "count" : 1};
+      contributors[user] = {"avatar" : avatar, "count" : 1};
     else
       contributors[user].count += 1;
   }
@@ -107,7 +129,8 @@ push_pull.update_assigned = function()
   push_pull.assigned_pie.update(sorted_contributors);
 }
 
-/// This sorts the contributors data and also sums the count
+/// This sorts the contributors data and also sums the count. 
+/// The sort orders in count, highest to lowest
 push_pull.sort_contributors = function(contributors)
 {
   var sorted_contributors = [];
@@ -126,16 +149,20 @@ push_pull.update_plots = function()
   var lifetime_number = [];
   var lifetime_commits = [];
   var lifetime_changes = [];
+  // For each github object add to each list an array of the [x, y] coordinate. 
+  // y is always lifetime
   for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
   {
+    // Is selected?
     if(!push_pull.select(push_pull.gh_objects[iobject]))
       continue;
-    lifetime_comments.push([push_pull.gh_objects[iobject].comments, push_pull.lifespan(push_pull.gh_objects[iobject])]);
-    lifetime_number.push([push_pull.gh_objects[iobject].number, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+    var lifespan = push_pull.lifespan(push_pull.gh_objects[iobject]);
+    lifetime_comments.push([push_pull.gh_objects[iobject].comments, lifespan]);
+    lifetime_number.push([push_pull.gh_objects[iobject].number, lifespan]);
     if(push_pull.gh_objects[iobject].commits)
-      lifetime_commits.push([push_pull.gh_objects[iobject].commits, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+      lifetime_commits.push([push_pull.gh_objects[iobject].commits, lifespan]);
     if(push_pull.gh_objects[iobject].additions && push_pull.gh_objects[iobject].deletions)
-      lifetime_changes.push([push_pull.gh_objects[iobject].additions + push_pull.gh_objects[iobject].deletions, push_pull.lifespan(push_pull.gh_objects[iobject])]);
+      lifetime_changes.push([push_pull.gh_objects[iobject].additions + push_pull.gh_objects[iobject].deletions, lifespan]);
   }
   push_pull.lifetime_comments.update(lifetime_comments);
   push_pull.lifetime_number.update(lifetime_number);
@@ -143,38 +170,54 @@ push_pull.update_plots = function()
   push_pull.lifetime_changes.update(lifetime_changes);
 }
 
-/// This function takes an array of closed pull request objects and fills the data arrays
+/// This function processes a list of pull requests/issues and requests the full
+/// details for each pull request/issue. The full details are then saved in the
+/// global push_pull.gh_objects list
 push_pull.process = function(json)
 {
   for(var iobject = 0; iobject < json.length; iobject++)
   {
-    $.getJSON(json[iobject].url, function(json){push_pull.gh_objects.push(json); push_pull.update();}).error(push_pull.process_error);
+    // Updates on each response if the number of objects is less than 100
+    $.getJSON(json[iobject].url, function(json)
+              {
+                push_pull.gh_objects.push(json); 
+                if(push_pull.gh_objects.length < 100)
+                  push_pull.update();
+              }).error(push_pull.process_error);
   }
+  // Update on completion
   push_pull.update();
 }
 
+/// This function deals with an error and alerts the user
 push_pull.process_error = function(error)
 {
   $('#error').show();
   $.getJSON("https://api.github.com/rate_limit", function(result) {$('.requests').text(result.resources.core.remaining);});
   $('#error_message').text(error.status + " " + error.statusText);
+  /// Update with whatever has been retrieved
   push_pull.update();
 }
 
-$('#get_pulls').on('click', function()
+/// Get all the objects by type specified, by asking github for them in blocks 
+/// of 100. 100 is the maximum that can be requested at any one time.
+push_pull.get_github_objects = function(type)
 {
+  // Reset the existing list and selection criteria
   push_pull.gh_objects = [];
   push_pull.change_selection(push_pull.STypes.None, null);
   var username = $('#username').val();
   var repository = $('#repository').val();
   get_json = function(username, repository, page) 
   { 
-    $.getJSON("https://api.github.com/repos/" + username + "/" + repository + "/pulls\?state\=closed\&page\=" + page + "\&per_page\=100", 
-              function(json) 
+    // Note only closed objects are considered
+    $.getJSON("https://api.github.com/repos/" + username + "/" + repository + "/" + type + "\?state\=closed\&page\=" + page + "\&per_page\=100", 
+              function(json)
               {
                 push_pull.process(json); 
+                // As long as some objects were returned ask for more
                 if(json.length > 0) get_json(username, repository, page + 1);
-                else 
+                else
                   {
                     $('#success').show();
                     $.getJSON("https://api.github.com/rate_limit", function(result) {$('.requests').text(result.resources.core.remaining);});
@@ -184,29 +227,29 @@ $('#get_pulls').on('click', function()
     push_pull.update();
   }
   get_json(username, repository, 1);
+}
+
+/// UI control below
+
+/// Get all the pull requests, by asking github for them in blocks of 100
+/// 100 is the maximum that can be requested at any one time.
+$('#get_pulls').on('click', function()
+{
+  push_pull.mode = push_pull.MTypes.PullRequest;
+  push_pull.get_github_objects("pulls");
   $('#controls').fadeOut();
 });
 
+/// Get all the issues, by asking github for them in blocks of 100
+/// 100 is the maximum that can be requested at any one time.
 $('#get_issues').on('click', function()
 {
-  push_pull.gh_objects = [];
-  push_pull.change_selection(push_pull.STypes.None, null);
-  var username = $('#username').val();
-  var repository = $('#repository').val();
-  get_json = function(username, repository, page) 
-  { 
-    $.getJSON("https://api.github.com/repos/" + username + "/" + repository + "/issues\?state\=closed\&page\=" + page + "\&per_page\=100", 
-              function(json) 
-              {
-                push_pull.process(json); 
-                if(json.length > 0) get_json(username, repository, page + 1);
-              });
-    push_pull.update();
-  }
-  get_json(username, repository, 1);
+  push_pull.mode = push_pull.MTypes.Issue;
+  push_pull.get_github_objects("issues");
   $('#controls').fadeOut();
 });
 
+/// Set the specified token to the ajax header
 $('#set_token').on('click', function()
 {
   $.ajaxSetup({
@@ -219,7 +262,8 @@ $('#show_controls').on('click', function() {$('#controls').fadeIn();});
 $('#hide_controls').on('click', function() {$('#controls').fadeOut();});
 $('#hide_error').on('click', function() {$('#error').fadeOut();});
 $('#help').on('click', function() {window.location.href = "#help";});
-$(window).load(function()
+/// This positions the popups in the centre of the window
+push_pull.resize = function()
 {
   $('#success').hide();
   $('#success').css({"top" : ($(window).height() - $('#success').outerHeight()) / 2 + "px",
@@ -229,4 +273,7 @@ $(window).load(function()
                    "left" : ($(window).width() - $('#error').outerWidth()) / 2 + "px"});
   $('#controls').css({"top" : ($(window).height() - $('#controls').outerHeight()) / 2 + "px",
                       "left" : ($(window).width() - $('#controls').outerWidth()) / 2 + "px"});
-});
+}
+/// Resize things on load or resize of the window
+$(window).resize(push_pull.resize());
+$(window).load(push_pull.resize());

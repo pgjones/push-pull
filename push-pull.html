@@ -42,14 +42,14 @@
         <table id="lifespan_list" class="table table-striped"></table>
       </div>
       <div class="col-md-4" style="height: 500px;overflow: auto;">
-        <h2 style="margin-top:0;">Created By</h2>
+        <h2 style="margin-top:0;">Created User</h2>
         <p>Pull requests/issue by creation user</p>
         <p style="text-align:center"><canvas id="created" width="300" height="300"></canvas></p>
         <table id="created_list" class="table table-striped"></table>
       </div>
       <div class="col-md-4" style="height: 500px;overflow: auto;">
-        <h2 style="margin-top:0;">Assigned To</h2>
-        <p>Pull requests/issue by assigned user</p>
+        <h2 style="margin-top:0;">Merged/Assigned User</h2>
+        <p>Pull requests/issue by merger or assigned user</p>
         <p style="text-align:center"><canvas id="assigned" width="300" height="300"></canvas></p>
         <table id="assigned_list" class="table table-striped"></table>
       </div>
@@ -86,6 +86,7 @@
           Then click <button class="btn btn-primary">Fetch Pulls</button> or <button class="btn btn-primary">Fetch Issues</button> to fetch pull request or issue statistics from gitub.
           Private github repositories will require authentication for access, via a github token, as explained on github <a href="https://github.com/blog/1509-personal-api-tokens">here</a>.
           After entering the token be sure to click <button class="btn btn-primary">Set Token</button> for it to be applied.
+          Note that only closed pull requests and issues are considered for statistics.
         </p>
         <p>Clicking on the histogram will select only the pull requests/issues with the lifespan selected, whereas clicking the pie charts will select pull requests/issues created by or assigned to a specific user (this can also be acheived by selecting the lifespan/user in the table below).
           Selection can be reset by clicking <button class="btn btn-default" title="Reset"><span class="glyphicon glyphicon-repeat"></span></button>.
@@ -101,7 +102,7 @@ var created = new Date(object.created_at);
 var closed = new Date(object.closed_at);
 var lifspan = closed - created;</pre>
         </p>
-        <p>The user creating the pull request/issue is given by the <code>object.user</code> field, and the user assigned is given by the <code>object.assignee</code> field.
+        <p>The user creating the pull request/issue is given by the <code>object.user</code> field, and the user assigned to the issue is given by the <code>object.assignee</code> field whilst the user that merged the pull request is given by the <code>object.merged_by</code> field.
         </p>
         <h4>Aside</h4>
         <p>I thought I'd find correlations between lifespan and users, comments, commits, change-size and github (#) number.
