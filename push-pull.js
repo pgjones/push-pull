@@ -188,6 +188,7 @@ $('#get_pulls').on('click', function()
     push_pull.update();
   }
   get_json(username, repository, 1);
+  $('#controls').fadeOut();
 });
 
 $('#get_issues').on('click', function()
@@ -207,6 +208,7 @@ $('#get_issues').on('click', function()
     push_pull.update();
   }
   get_json(username, repository, 1);
+  $('#controls').fadeOut();
 });
 
 $('#set_token').on('click', function()
@@ -217,3 +219,5 @@ $('#set_token').on('click', function()
 });
 
 $('#reset_selection').on('click', function() {push_pull.change_selection(push_pull.STypes.None, null);});
+$('#show_controls').on('click', function() {$('#controls').fadeIn();});
+$('#hide_controls').on('click', function() {$('#controls').fadeOut();});

@@ -109,7 +109,11 @@ push_pull.Histogram = function(canvas, table)
       var bar_top = (this._max - this._bins[ibin].count) / this._max * this._height;
       this._context.fillRect(20 + ibin * this._bin_width, bar_top, this._bin_width, this._height - bar_top);
       this._context.fillStyle = "black";
-      this._context.fillText(this._bins[ibin].text, 20 + ibin * this._bin_width, this._context.canvas.height - 5, this._bin_width);
+      this._context.save();
+      this._context.translate(20 + ibin * this._bin_width, this._context.canvas.height - 10);
+      this._context.rotate(Math.PI/10);
+      this._context.fillText(this._bins[ibin].text, 0, 0, this._bin_width);//20 + ibin * this._bin_width, this._context.canvas.height - 5, this._bin_width);
+      this._context.restore();
     }
     // Now y axis
     this._context.fillStyle = "black";
