@@ -27,10 +27,10 @@ push_pull.Graph = function(canvas, name)
     {
       // Sort in y and get y range
       this._data.sort(function(a, b) {return a[1] - b[1]});
-      this._y = [this._data[0][1], this._data[this._data.length - 1][1]];
+      this._y = [this._data[0][1], 1.1 * this._data[this._data.length - 1][1]];
       // Sort in x and get x domain
       this._data.sort(function(a, b) {return a[0] - b[0]});
-      this._x = [this._data[0][0], this._data[this._data.length - 1][0]];
+      this._x = [this._data[0][0], 1.1 * this._data[this._data.length - 1][0]];
       if(this._y[0] < 10)
         this._y[0] = 0.0;
       if(this._x[0] < 10)

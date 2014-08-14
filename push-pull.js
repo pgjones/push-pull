@@ -56,6 +56,7 @@ push_pull.update = function()
   push_pull.update_lifespan();
   push_pull.update_created();
   push_pull.update_assigned();
+  push_pull.update_plots();
 }
 
 push_pull.update_lifespan = function()
@@ -142,33 +143,22 @@ push_pull.update_plots = function()
   push_pull.lifetime_changes.update(lifetime_changes);
 }
 
-$('#get_details').on('click', function()
-{
-  var setter = function(iobject)
-  {
-    return function(json) 
-    {
-      push_pull.gh_objects[iobject].comments = json.comments;
-      push_pull.gh_objects[iobject].number = json.number;
-      if(json.commits)
-        push_pull.gh_objects[iobject].commits = json.commits;
-      if(json.additions)
-        push_pull.gh_objects[iobject].additions = json.additions;
-      if(json.deletions)
-        push_pull.gh_objects[iobject].deletions = json.deletions;
-      push_pull.update_plots();
-    }
-  }
-  for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
-  {
-    $.getJSON(push_pull.gh_objects[iobject].url, setter(iobject));
-  }
-});
-
 /// This function takes an array of closed pull request objects and fills the data arrays
 push_pull.process = function(json)
 {
-  push_pull.gh_objects.push.apply(push_pull.gh_objects, json);
+  for(var iobject = 0; iobject < json.length; iobject++)
+  {
+    $.getJSON(json[iobject].url, function(json){push_pull.gh_objects.push(json); push_pull.update();}).error(push_pull.process_error);
+  }
+  push_pull.update();
+}
+
+push_pull.process_error = function(error)
+{
+  $('#error').show();
+  $.getJSON("https://api.github.com/rate_limit", function(result) {$('.requests').text(result.resources.core.remaining);});
+  $('#error_message').text(error.status + " " + error.statusText);
+  push_pull.update();
 }
 
 $('#get_pulls').on('click', function()
@@ -184,7 +174,13 @@ $('#get_pulls').on('click', function()
               {
                 push_pull.process(json); 
                 if(json.length > 0) get_json(username, repository, page + 1);
-              });
+                else 
+                  {
+                    $('#success').show();
+                    $.getJSON("https://api.github.com/rate_limit", function(result) {$('.requests').text(result.resources.core.remaining);});
+                    setTimeout(function(){$('#success').fadeOut();}, 1500);
+                  }
+              }).error(push_pull.process_error);
     push_pull.update();
   }
   get_json(username, repository, 1);
@@ -221,3 +217,16 @@ $('#set_token').on('click', function()
 $('#reset_selection').on('click', function() {push_pull.change_selection(push_pull.STypes.None, null);});
 $('#show_controls').on('click', function() {$('#controls').fadeIn();});
 $('#hide_controls').on('click', function() {$('#controls').fadeOut();});
+$('#hide_error').on('click', function() {$('#error').fadeOut();});
+$('#help').on('click', function() {window.location.href = "#help";});
+$(window).load(function()
+{
+  $('#success').hide();
+  $('#success').css({"top" : ($(window).height() - $('#success').outerHeight()) / 2 + "px",
+                     "left" : ($(window).width() - $('#success').outerWidth()) / 2 + "px"});
+  $('#error').hide();
+  $('#error').css({"top" : ($(window).height() - $('#error').outerHeight()) / 2 + "px",
+                   "left" : ($(window).width() - $('#error').outerWidth()) / 2 + "px"});
+  $('#controls').css({"top" : ($(window).height() - $('#controls').outerHeight()) / 2 + "px",
+                      "left" : ($(window).width() - $('#controls').outerWidth()) / 2 + "px"});
+});
