@@ -30,7 +30,7 @@ push_pull.Histogram = function(canvas, table)
   this.mouse_move = function(event)
   {
     this.pick(event);
-  }
+  };
   /// Update on a click
   this.mouse_click = function(event)
   {
@@ -41,12 +41,12 @@ push_pull.Histogram = function(canvas, table)
       // If the user has selected something other than the 1st bin, get the 
       // lower bin edge (upper bin edge of lower bin)
       if(this._selected > 0)
-        lower_time = this._bins[this._selected - 1].time
+        lower_time = this._bins[this._selected - 1].time;
       // Now change the global selection to by lifespan with a lower and 
       // upper limit on the lifespan
       push_pull.change_selection(push_pull.STypes.Lifespan, lower_time, this._bins[this._selected].time);
     }
-  }
+  };
   /// This picks the sector the mouse is over (if any)
   this.pick = function(event)
   {
@@ -61,7 +61,7 @@ push_pull.Histogram = function(canvas, table)
       this._selected = Math.floor((x - this._axis_size) / this._bin_width);
     
     this.draw();
-  }
+  };
 
   /// Update with data. data should be an array of lifespans
   this.update = function(data)
@@ -73,7 +73,7 @@ push_pull.Histogram = function(canvas, table)
     for(var idata = 0; idata < data.length; idata++)
     {
       var lifespan = data[idata];
-      for(var ibin = 0; ibin < this._bins.length; ibin++)
+      for(ibin = 0; ibin < this._bins.length; ibin++)
       {
         if(lifespan < this._bins[ibin].time)
         {
@@ -84,24 +84,24 @@ push_pull.Histogram = function(canvas, table)
     }
     // Max bin value, used to scale y axis
     this._max = 0;
-    for(var ibin = 0; ibin < this._bins.length; ibin++)
+    for(ibin = 0; ibin < this._bins.length; ibin++)
       this._max = Math.max(this._max, this._bins[ibin].count);
     // Now update the table, by first emptying it
     this._table.empty();
     // This function creates a closure method to change the global selection to 
     // by lifespan
-    var select_generator = function(value, value2) { return function(event) {push_pull.change_selection(push_pull.STypes.Lifespan, value, value2);} };
-    for(var ibin = 0; ibin < this._bins.length; ibin++)
+    var select_generator = function(value, value2) { return function(event) {push_pull.change_selection(push_pull.STypes.Lifespan, value, value2);};};
+    for(ibin = 0; ibin < this._bins.length; ibin++)
     {
       var lower_time = 0.0;
       if(ibin > 0)
-        lower_time = this._bins[ibin - 1].time
+        lower_time = this._bins[ibin - 1].time;
       var row = $('<tr style="cursor:pointer;"><td>' + this._bins[ibin].text + '</td><td>' + this._bins[ibin].count + '</td></tr>');
       row.on('click', select_generator(lower_time, this._bins[ibin].time));
       this._table.append(row);
     }
     this.draw();
-  }
+  };
 
   /// Draw the data
   this.draw = function()
@@ -132,7 +132,7 @@ push_pull.Histogram = function(canvas, table)
     this._context.fillText("0", 0, this._height, this._axis_size);
     this._context.fillText(this._max, 0, 10, this._axis_size);
     this._context.restore();
-  }
+  };
   // Start with a histogram deviod of data.
   this.update([]);
-}
+};

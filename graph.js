@@ -19,7 +19,7 @@ push_pull.Graph = function(canvas, name)
   this.update = function(data)
   {
     this._data = data;
-    if(data.length == 0) // If the data is empty use a single point at 0, 0
+    if(data.length === 0) // If the data is empty use a single point at 0, 0
     {
       this._x = [0, 1];
       this._y = [0, 1];
@@ -28,10 +28,10 @@ push_pull.Graph = function(canvas, name)
     else
     {
       // Sort in y and get y range
-      this._data.sort(function(a, b) {return a[1] - b[1]});
+      this._data.sort(function(a, b) {return a[1] - b[1];});
       this._y = [this._data[0][1], 1.1 * this._data[this._data.length - 1][1]];
       // Sort in x and get x domain
-      this._data.sort(function(a, b) {return a[0] - b[0]});
+      this._data.sort(function(a, b) {return a[0] - b[0];});
       this._x = [this._data[0][0], 1.1 * this._data[this._data.length - 1][0]];
       // Set x/y minimums to 0 if close (<10)
       if(this._y[0] < 10)
@@ -40,7 +40,7 @@ push_pull.Graph = function(canvas, name)
         this._x[0] = 0.0;
     }
     this.draw();
-  }
+  };
 
   /// Draw the data
   this.draw = function()
@@ -87,7 +87,7 @@ push_pull.Graph = function(canvas, name)
     this._context.rotate(-Math.PI/2);
     this._context.fillText("lifetime", 0.0, 0.0, this._axis_size - 1);
     this._context.restore();
-  }
+  };
   // Start with a graph deviod of data
   this.update([]);
-}
+};

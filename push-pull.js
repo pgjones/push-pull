@@ -1,14 +1,14 @@
 var push_pull = push_pull || {}; // Global namespace
 // Now the globals
 push_pull.gh_objects = []; // JSON github objects
-push_pull.images = {} // Global image collection
+push_pull.images = {}; // Global image collection
 // Global modes, pull request or issues
 push_pull.MTypes = Object.freeze({PullRequest : 1, Issue : 2});
 push_pull.mode = push_pull.MTypes.PullRequest;
 // Selection types i.e. select on nothing, lifespan etc... 
 push_pull.STypes = Object.freeze({None : 0, Lifespan : 1, Created : 2, Assigned : 3}); 
 // Selection method, default is to select everything (no selection)
-push_pull.select = function(gh_object) {return true;} 
+push_pull.select = function(gh_object) {return true;};
 
 /// Global plots
 push_pull.lifespan_histogram = new push_pull.Histogram($('#lifespan'), $('#lifespan_list'));
@@ -25,26 +25,26 @@ push_pull.change_selection = function(type, value, value2)
 {
   if(type == push_pull.STypes.None)
   {
-    push_pull.select = function(gh_object) {return true;}
+    push_pull.select = function(gh_object) {return true;};
   }
   else if(type == push_pull.STypes.Lifespan)
   {
-    push_pull.select = function(gh_object) {if(push_pull.lifespan(gh_object) < value2 && push_pull.lifespan(gh_object) > value) return true; return false;}
+    push_pull.select = function(gh_object) {if(push_pull.lifespan(gh_object) < value2 && push_pull.lifespan(gh_object) > value) return true; return false;};
   }
   else if(type == push_pull.STypes.Created)
   {
-    push_pull.select = function(gh_object) {if(gh_object.user != null && gh_object.user.login == value) return true; return false;}
+    push_pull.select = function(gh_object) {if(gh_object.user !== null && gh_object.user.login == value) return true; return false;};
   }
   else if(type == push_pull.STypes.Assigned && push_pull.mode == push_pull.MTypes.PullRequest)
   {
-    push_pull.select = function(gh_object) {if(gh_object.merged_by != null && gh_object.merged_by.login == value) return true;  return false;}
+    push_pull.select = function(gh_object) {if(gh_object.merged_by !== null && gh_object.merged_by.login == value) return true;  return false;};
   }
   else if(type == push_pull.STypes.Assigned && push_pull.mode == push_pull.MTypes.Issue)
   {
-    push_pull.select = function(gh_object) {if(gh_object.assignee != null && gh_object.assignee.login == value) return true;  return false;}
+    push_pull.select = function(gh_object) {if(gh_object.assignee !== null && gh_object.assignee.login == value) return true;  return false;};
   }
   push_pull.update();
-}
+};
 
 /// Helper method, gets the lifespan of a gh object
 push_pull.lifespan = function(gh_object)
@@ -52,7 +52,7 @@ push_pull.lifespan = function(gh_object)
   var created = new Date(gh_object.created_at);
   var closed = new Date(gh_object.closed_at);
   return closed - created;
-}
+};
 
 /// This updates everything on a change in the data
 push_pull.update = function()
@@ -61,7 +61,7 @@ push_pull.update = function()
   push_pull.update_created();
   push_pull.update_assigned();
   push_pull.update_plots();
-}
+};
 
 /// This updates the lifespan histogram
 push_pull.update_lifespan = function()
@@ -74,7 +74,7 @@ push_pull.update_lifespan = function()
       lifespans.push(push_pull.lifespan(push_pull.gh_objects[iobject]));
   }
   push_pull.lifespan_histogram.update(lifespans);
-}
+};
 
 /// This updates the created-by pie chart
 push_pull.update_created = function()
@@ -83,7 +83,7 @@ push_pull.update_created = function()
   for(var iobject = 0; iobject < push_pull.gh_objects.length; iobject++)
   {
     // Has a user (can not exist strangely) and Is selected?
-    if(push_pull.gh_objects[iobject].user == null || !push_pull.select(push_pull.gh_objects[iobject]))
+    if(push_pull.gh_objects[iobject].user === null || !push_pull.select(push_pull.gh_objects[iobject]))
       continue;
     var user = push_pull.gh_objects[iobject].user.login;
     if(contributors[user] === undefined)
@@ -93,7 +93,7 @@ push_pull.update_created = function()
   }
   var sorted_contributors = push_pull.sort_contributors(contributors);
   push_pull.created_pie.update(sorted_contributors);
-}
+};
 
 /// This updates the assigned data and draws a pie chart
 push_pull.update_assigned = function()
@@ -106,19 +106,19 @@ push_pull.update_assigned = function()
       continue;
     var user = null;
     var avatar = null;
-    if(push_pull.mode == push_pull.MTypes.Issue && push_pull.gh_objects[iobject].assignee != null)
+    if(push_pull.mode == push_pull.MTypes.Issue && push_pull.gh_objects[iobject].assignee !== null)
     {
       user = push_pull.gh_objects[iobject].assignee.login;
       avatar = push_pull.gh_objects[iobject].assignee.avatar_url;
     }
-    else if(push_pull.mode == push_pull.MTypes.PullRequest && push_pull.gh_objects[iobject].merged_by != null)
+    else if(push_pull.mode == push_pull.MTypes.PullRequest && push_pull.gh_objects[iobject].merged_by !== null)
     {
       user = push_pull.gh_objects[iobject].merged_by.login;
       avatar = push_pull.gh_objects[iobject].merged_by.avatar_url;
     }
     else 
       continue; // No useful data (not merged or assigned)
-    if(avatar == null)
+    if(avatar === null)
       console.log(push_pull.gh_objects[iobject]);
     if(contributors[user] === undefined)
       contributors[user] = {"avatar" : avatar, "count" : 1};
@@ -127,7 +127,7 @@ push_pull.update_assigned = function()
   }
   var sorted_contributors = push_pull.sort_contributors(contributors);
   push_pull.assigned_pie.update(sorted_contributors);
-}
+};
 
 /// This sorts the contributors data and also sums the count. 
 /// The sort orders in count, highest to lowest
@@ -138,9 +138,9 @@ push_pull.sort_contributors = function(contributors)
   {
     sorted_contributors.push([contributors[contributor].count, contributor, contributors[contributor].avatar]);
   }
-  sorted_contributors.sort(function(a, b) {return b[0] - a[0]});
+  sorted_contributors.sort(function(a, b) {return b[0] - a[0];});
   return sorted_contributors;
-}
+};
 
 /// This function updates the plots
 push_pull.update_plots = function()
@@ -168,7 +168,7 @@ push_pull.update_plots = function()
   push_pull.lifetime_number.update(lifetime_number);
   push_pull.lifetime_commits.update(lifetime_commits);
   push_pull.lifetime_changes.update(lifetime_changes);
-}
+};
 
 /// This function processes a list of pull requests/issues and requests the full
 /// details for each pull request/issue. The full details are then saved in the
@@ -178,16 +178,19 @@ push_pull.process = function(json)
   for(var iobject = 0; iobject < json.length; iobject++)
   {
     // Updates on each response if the number of objects is less than 100
-    $.getJSON(json[iobject].url, function(json)
-              {
-                push_pull.gh_objects.push(json); 
-                if(push_pull.gh_objects.length < 100)
-                  push_pull.update();
-              }).error(push_pull.process_error);
+    $.getJSON(json[iobject].url, push_pull.process_object).error(push_pull.process_error);
   }
   // Update on completion
   push_pull.update();
-}
+};
+
+/// Process a single object as returned by github
+push_pull.process_object = function(json)
+{
+  push_pull.gh_objects.push(json);
+  if(push_pull.gh_objects.length < 100)
+    push_pull.update();
+};
 
 /// This function deals with an error and alerts the user
 push_pull.process_error = function(error)
@@ -197,7 +200,7 @@ push_pull.process_error = function(error)
   $('#error_message').text(error.status + " " + error.statusText);
   /// Update with whatever has been retrieved
   push_pull.update();
-}
+};
 
 /// Get all the objects by type specified, by asking github for them in blocks 
 /// of 100. 100 is the maximum that can be requested at any one time.
@@ -211,7 +214,7 @@ push_pull.get_github_objects = function(type)
   get_json = function(username, repository, page) 
   { 
     // Note only closed objects are considered
-    $.getJSON("https://api.github.com/repos/" + username + "/" + repository + "/" + type + "\?state\=closed\&page\=" + page + "\&per_page\=100", 
+    $.getJSON("https://api.github.com/repos/" + username + "/" + repository + "/" + type + "?state=closed&page=" + page + "&per_page=100", 
               function(json)
               {
                 push_pull.process(json); 
@@ -225,9 +228,9 @@ push_pull.get_github_objects = function(type)
                   }
               }).error(push_pull.process_error);
     push_pull.update();
-  }
+  };
   get_json(username, repository, 1);
-}
+};
 
 /// UI control below
 
@@ -273,7 +276,7 @@ push_pull.resize = function()
                    "left" : ($(window).width() - $('#error').outerWidth()) / 2 + "px"});
   $('#controls').css({"top" : ($(window).height() - $('#controls').outerHeight()) / 2 + "px",
                       "left" : ($(window).width() - $('#controls').outerWidth()) / 2 + "px"});
-}
+};
 /// Resize things on load or resize of the window
 $(window).resize(push_pull.resize());
 $(window).load(push_pull.resize());
