@@ -274,7 +274,7 @@ push_pull.resize = function()
   $('#error').hide();
   $('#error').css({"top" : ($(window).height() - $('#error').outerHeight()) / 2 + "px",
                    "left" : ($(window).width() - $('#error').outerWidth()) / 2 + "px"});
-  $('#controls').css({"top" : ($(window).height() - $('#controls').outerHeight()) / 2 + "px",
+  $('#controls').css({"top" : ($(window).height() - $('#controls').outerHeight()) / 10 + "px",
                       "left" : ($(window).width() - $('#controls').outerWidth()) / 2 + "px"});
 };
 /// Resize things on load or resize of the window
