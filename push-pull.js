@@ -195,6 +195,7 @@ push_pull.process_object = function(json)
 /// This function deals with an error and alerts the user
 push_pull.process_error = function(error)
 {
+  $('#loader').hide();
   $('#error').show();
   $.getJSON("https://api.github.com/rate_limit", function(result) {$('.requests').text(result.resources.core.remaining);});
   $('#error_message').text(error.status + " " + error.statusText);
@@ -223,6 +224,7 @@ push_pull.get_github_objects = function(type)
                 else
                   {
                     $('#success').show();
+                    $('#loader').hide();
                     $.getJSON("https://api.github.com/rate_limit", function(result) {$('.requests').text(result.resources.core.remaining);});
                     setTimeout(function(){$('#success').fadeOut();}, 1500);
                   }
@@ -238,6 +240,7 @@ push_pull.get_github_objects = function(type)
 /// 100 is the maximum that can be requested at any one time.
 $('#get_pulls').on('click', function()
 {
+  $('#loader').show();
   push_pull.mode = push_pull.MTypes.PullRequest;
   push_pull.get_github_objects("pulls");
   $('#controls').fadeOut();
@@ -247,6 +250,7 @@ $('#get_pulls').on('click', function()
 /// 100 is the maximum that can be requested at any one time.
 $('#get_issues').on('click', function()
 {
+  $('#loader').show();
   push_pull.mode = push_pull.MTypes.Issue;
   push_pull.get_github_objects("issues");
   $('#controls').fadeOut();
@@ -264,6 +268,7 @@ $('#reset_selection').on('click', function() {push_pull.change_selection(push_pu
 $('#show_controls').on('click', function() {$('#controls').fadeIn();});
 $('#hide_controls').on('click', function() {$('#controls').fadeOut();});
 $('#hide_error').on('click', function() {$('#error').fadeOut();});
+$('#hide_graph').on('click', function() {$('#large_graph').fadeOut();});
 $('#help').on('click', function() {window.location.href = "#help";});
 /// This positions the popups in the centre of the window
 push_pull.resize = function()
@@ -276,7 +281,13 @@ push_pull.resize = function()
                    "left" : ($(window).width() - $('#error').outerWidth()) / 2 + "px"});
   $('#controls').css({"top" : ($(window).height() - $('#controls').outerHeight()) / 10 + "px",
                       "left" : ($(window).width() - $('#controls').outerWidth()) / 2 + "px"});
+  push_pull.large_graph.resize();
 };
 /// Resize things on load or resize of the window
 $(window).resize(push_pull.resize());
-$(window).load(push_pull.resize());
+$(window).load(function() 
+{
+  $('#large_graph').hide(); 
+  $('#loader').hide();
+  push_pull.resize(); 
+});

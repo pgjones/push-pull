@@ -14,6 +14,8 @@ push_pull.Graph = function(canvas, name)
 
   /// On clicks change log to linear and vice versa
   this._canvas.on('mouseup', function(event) {this._log = !this._log; this.draw();}.bind(this));
+  /// On double click display large graph
+  this._canvas.on('dblclick', function(event) {push_pull.large_graph.show(this._data, this._x_name);}.bind(this));
 
   /// Update with data. data should be an array of [x, y] coordiantes
   this.update = function(data)
