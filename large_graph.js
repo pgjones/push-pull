@@ -24,7 +24,7 @@ push_pull.large_graph = new function()
   this._canvas.on('mousedown', function(event){this.mouse_down(event);}.bind(this));
   this._canvas.on('mouseup', function(event) {this.mouse_up(event);}.bind(this));
   this._canvas.on('mousemove', function(event) {this.mouse_move(event);}.bind(this));
-  this._canvas.on('mouseenter', function(event) {if(event.which == 0) this._mode = MMode.Up; this.draw();}.bind(this));
+  this._canvas.on('mouseenter', function(event) {if(event.which === 0) this._mode = MMode.Up; this.draw();}.bind(this));
   this._canvas.on('contextmenu', function(event) {return false;});
 
   /// On mouse down start selecting a graph area
