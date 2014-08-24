@@ -31,6 +31,7 @@
             <label class="sr-only" for="token">Github Token</label>
             <input type="text" class="form-control" id="token" placeholder="token">
             <button id="set_token" class="btn btn-primary">Set Token</button>
+            <button id="controls_help" class="btn btn-default" title="Help?"><span class="glyphicon glyphicon-question-sign"></span></button>
           </div>
         </div>
       </div>
@@ -92,6 +93,7 @@
         <p>Clicking on the histogram will select only the pull requests/issues with the lifespan selected, whereas clicking the pie charts will select pull requests/issues created by or assigned to a specific user (this can also be acheived by selecting the lifespan/user in the table below).
           Selection can be reset by clicking <button class="btn btn-default" title="Reset"><span class="glyphicon glyphicon-repeat"></span></button>.
           Clicking a linear-x plot will create a log-x plot and vice versa.
+          Double-clicking a plot will enlarge it, an enlarged plot can be zoomed in via dragging and zoomed out via right clicking.
         </p>
         <p>This webpage makes us of the <a href="https://developer.github.com/v3/">github api</a> which limits the number of requests a user can make.
           As 1.01 requests are required for each pull request/issue an unauthenticated user can view the statistics of no more than 59 pull requests/issues by default whereas a authenticated user can view the statistics of 5940.
@@ -107,7 +109,8 @@ var lifspan = closed - created;</pre>
         </p>
         <h4>Aside</h4>
         <p>I thought I'd find correlations between lifespan and users, comments, commits, change-size and github (#) number.
-          I have only really found a slight correlation between lifespan and change-size on the repository I work on, additionally the median pull request lifespan is 1 week unless it is a pull request I created in which case it is a month :(.
+          I have only really found a slight correlation between lifespan and change-size on the repository I work on.
+          Additionally the median pull request lifespan is 1 week unless it is a pull request I created in which case it is a month :(.
         </p>
       </div>
       <div class="col-md-1"></div>
