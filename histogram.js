@@ -94,9 +94,10 @@ push_pull.Histogram = function(canvas, table)
     for(ibin = 0; ibin < this._bins.length; ibin++)
     {
       var lower_time = 0.0;
+      var colour = this._bins[ibin].colour;
       if(ibin > 0)
         lower_time = this._bins[ibin - 1].time;
-      var row = $('<tr style="cursor:pointer;"><td>' + this._bins[ibin].text + '</td><td>' + this._bins[ibin].count + '</td></tr>');
+      var row = $('<tr style="cursor:pointer;"><td>' + this._bins[ibin].text + '</td><td>' + this._bins[ibin].count + '</td><td><div style="width: 20px; height: 20px; background-color:' + colour + ';"></div></td></tr>');
       row.on('click', select_generator(lower_time, this._bins[ibin].time));
       this._table.append(row);
     }

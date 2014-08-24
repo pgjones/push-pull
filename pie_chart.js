@@ -109,7 +109,10 @@ push_pull.PieChart = function(canvas, table, type)
     var select_generator = function(type, name) { return function(event) {push_pull.change_selection(type, name);}; };
     for(idata = 0; idata < data.length; idata++)
     {
-      var row = $('<tr style="cursor:pointer;"><td>' + data[idata][0] + '</td><td><img src="' + data[idata][2] + '" width="20" height="20"></td><td>' + data[idata][1] + '</td></tr>');
+      var colour = "black";
+      if(idata < this._colours.length)
+        colour = this._colours[idata];
+      var row = $('<tr style="cursor:pointer;"><td>' + data[idata][0] + '</td><td><img src="' + data[idata][2] + '" width="20" height="20"></td><td>' + data[idata][1] + '</td><td><div style="width: 20px; height: 20px; background-color:' + colour + ';"></div></td></tr>');
       row.on('click', select_generator(this._type, data[idata][1]));
       this._table.append(row);
     }

@@ -59,10 +59,10 @@ push_pull.large_graph = new function()
       {
         x = Math.max(Math.max(x, this._axis_size), 0);
         y = Math.max(Math.min(y, this._height), 0);
-        this._x = [((this._start[0] - this._axis_size) / this._width) * (this._x[1] - this._x[0]),
-                   ((x - this._axis_size) / this._width) * (this._x[1] - this._x[0])];
-        this._y = [((this._height - this._start[1]) / this._height) * (this._y[1] - this._y[0]),
-                   ((this._height - y) / this._height) * (this._y[1] - this._y[0])];
+        this._x = [((this._start[0] - this._axis_size) / this._width) * (this._x[1] - this._x[0]) + this._x[0],
+                   ((x - this._axis_size) / this._width) * (this._x[1] - this._x[0]) + this._x[0]];
+        this._y = [((this._height - this._start[1]) / this._height) * (this._y[1] - this._y[0]) + this._y[0],
+                   ((this._height - y) / this._height) * (this._y[1] - this._y[0]) + this._y[0]];
         this._x.sort(function(a, b){return a-b;});
         this._y.sort(function(a, b){return a-b;});
         this.draw();

@@ -270,6 +270,7 @@ $('#hide_controls').on('click', function() {$('#controls').fadeOut();});
 $('#hide_error').on('click', function() {$('#error').fadeOut();});
 $('#hide_graph').on('click', function() {$('#large_graph').fadeOut();});
 $('#help').on('click', function() {window.location.href = "#help";});
+$('#controls_help').on('click', function() {window.location.href = "#help"; $('#controls').hide();});
 /// This positions the popups in the centre of the window
 push_pull.resize = function()
 {
