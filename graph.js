@@ -52,7 +52,7 @@ push_pull.Graph = function(canvas, name)
     // xscale * x = pixel coordinate
     var xscale = this._width / (this._x[1] - this._x[0]);
     if(this._log)
-      xscale = this._width / (Math.log(this._x[1] - this._x[0]) / Math.LN10);
+      xscale = this._width / (Math.log(this._x[1] / this._x[0]) / Math.LN10);
     // yscal * y = pixel coordinate
     var yscale = this._height / (this._y[1] - this._y[0]);
     var range = this._y[1] - this._y[0];
@@ -61,7 +61,7 @@ push_pull.Graph = function(canvas, name)
       this._context.fillStyle = "black";
       var x = this._data[ipoint][0] - this._x[0];
       if(this._log)
-        x = Math.log(this._data[ipoint][0] - this._x[0]) / Math.LN10;
+        x = Math.log(this._data[ipoint][0] / this._x[0]) / Math.LN10;
       // Fill a 2x2 squre for each point, remember canvas coordinates are from 
       // top, left not bottom, left as in graphs
       this._context.fillRect(this._axis_size + xscale * x, (this._y[1] - this._data[ipoint][1]) * yscale - 1, 2, 2);
